@@ -1,0 +1,50 @@
+#!/bin/bash
+
+source hue_bashlibrary.sh
+
+
+ip='192.168.1.112'
+devicetype='pc'
+username='huelibrary'
+loglevel=1
+
+function usage {
+	echo "Usage: $cmdname [on | off]"
+}
+
+# hue <all|living> <on|off|movie> [intensity]
+
+cmdname=`basename "$0"`
+
+lights="1 2 3"
+
+
+if [[ $# == 1 ]]
+then
+	if [[ $1 == "on" ]]
+	then
+		#hue_onoff "on" $lights
+		hue_on_hue_sat_brightness 25500 50 255 $lights
+	elif [[ $1 == "off" ]]
+	then
+		hue_onoff off $lights
+	elif [[ $1 == "alert" ]]
+	then
+		hue_alert on 1
+		sleep 2
+		hue_alert off 1
+	else
+		usage
+	fi
+
+	echo
+	exit
+else
+	if (( $# > 1 ))
+	then
+		usage
+		echo
+		exit
+	fi
+fi
+
