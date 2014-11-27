@@ -1,0 +1,3 @@
+[submodule "hue_bashlibrary"]
+	path = hue_bashlibrary
+	url = https://github.com/markusproske/hue_bashlibrary
