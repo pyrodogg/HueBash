@@ -1,50 +1,141 @@
 #!/bin/bash
 
-source hue_bashlibrary.sh
-
+source ${0%/*}/hue_bashlibrary/hue_bashlibrary.sh
 
 ip='192.168.1.112'
 devicetype='pc'
 username='huelibrary'
 loglevel=1
 
+#Brightness
+bright=255
+dim=128
+
+#Saturation
+hard=255
+soft=128 
+verysoft=50
+ 
+#Colors
+red=0
+yellow=12750
+lime=25500
+green=36210
+blue=46920
+violet=56100
+
+
 function usage {
-	echo "Usage: $cmdname [on | off]"
+    echo "Usage: $cmdname [on | off]"
+    echo "       $cmdname set [hue] [sat] [bri]" 
 }
 
-# hue <all|living> <on|off|movie> [intensity]
+# Calculate hue number from arguments
+function get_hue {
+  if [[ $1 =~ ^[0-9]+$ ]] ; then
+    echo $1
+  else
+    case $1 in
+      red) echo 0 ;;
+      yellow) echo 12750 ;;
+      lime) echo 25500 ;;
+      green) echo 36210 ;;
+      blue) echo 46920 ;;
+      violet) echo 56100 ;;
+      *) return 1
+    esac
+  fi
+}
+
+# Calculate saturation number from arguments
+function get_sat {
+  if [[ $1 =~ ^[0-9]+$ ]] ; then
+    echo $1
+  else
+    case $1 in
+      verysoft|vsoft) echo 50 ;;
+      soft) echo 128 ;;
+      hard|vivid) echo 255 ;;
+      *) echo 255
+    esac
+  fi
+}
+
+# Calculate brightness number from arguments
+function get_bri { 
+  if [[ $1 =~ ^[0-9]+$ ]] ; then
+    echo $1
+  else
+    case $1 in
+      low) echo 64 ;;
+      medium|dim|mild) echo 128 ;;
+      high|bright) echo 255 ;;
+      *) echo 255
+    esac
+  fi
+}
+
+# Calculate white temperature
+# 153 (6500K) to 500 (2000K)
+function get_temp {
+  if [[ $1 =~ ^[0-9]+$ ]] ; then
+    echo $2
+  else
+    case $1 in
+      cold|cool) echo 153 ;;
+      medium|mid) echo 250 ;;
+      warm) echo 500 ;;
+      *) echo 500
+    esac
+  fi
+}
 
 cmdname=`basename "$0"`
-
 lights="1 2 3"
 
 
 if [[ $# == 1 ]]
 then
-	if [[ $1 == "on" ]]
-	then
-		#hue_onoff "on" $lights
-		hue_on_hue_sat_brightness 25500 50 255 $lights
-	elif [[ $1 == "off" ]]
-	then
-		hue_onoff off $lights
-	elif [[ $1 == "alert" ]]
-	then
-		hue_alert on 1
-		sleep 2
-		hue_alert off 1
-	else
-		usage
-	fi
+  if [[ $1 == "on" ]]
+  then
+    #hue_onoff "on" $lights
+    hue_on_hue_sat_brightness $lime $verysoft $bright $lights
+  elif [[ $1 == "off" ]] ; then
+    hue_onoff off $lights
+  elif [[ $1 == "alert" ]] ; then
+    hue_alert on 1
+    sleep 2
+    hue_alert off 1
+  elif [[ $1 == "test" ]] ; then
+    get_hue 'violet'
+  else
+    usage
+  fi
 
-	echo
-	exit
+  echo
+  exit
 else
-	if (( $# > 1 ))
-	then
-		usage
-		echo
-		exit
-	fi
+  if (( $# > 1 )) ; then
+    if [[ $1 == "set" ]] ; then
+        hue_on_hue_sat_brightness $(get_hue $2) $(get_sat $3) $(get_bri $4) $lights
+    elif [[ $1 == "white" ]] ; then
+      if [ -z $3 ] ; then
+        hue_setstate_mired $(get_temp $2) $lights
+      else
+        hue_on_mired_brightness $(get_temp $2) $(get_bri $3) $lights
+      fi
+    else
+      usage
+    fi
+     
+    echo
+    exit
+  else
+
+    usage
+    echo
+    exit
+  fi
 fi
+
 
