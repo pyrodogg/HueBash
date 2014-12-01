@@ -30,9 +30,9 @@ function usage {
   echo "       $cmdname set [hue] [sat] [bri]"
   echo "       $cmdname white [temp]"
   echo "" 
-  echo "       Colors: red, yellow, lime, blue, violet"
-  echo "       Saturation: vsoft, soft, hard"
-  echo "       Brightness: low, medium, high"
+  echo "       Colors: red, yellow, lime, blue, violet or 0-65280"
+  echo "       Saturation: vsoft, soft, hard or 0-255 or 0-100%"
+  echo "       Brightness: low, medium, high or 0-255 or 0-100%"
   echo "       Color Temp: cool, medium, warm"
 }
 
@@ -55,7 +55,8 @@ function get_hue {
 
 # Calculate saturation number from arguments
 function get_sat {
-  if [[ $1 =~ ^[0-9]+$ ]] ; then
+  
+  elif [[ $1 =~ ^[0-9]+$ ]] ; then
     echo $1
   else
     case $1 in
@@ -69,7 +70,9 @@ function get_sat {
 
 # Calculate brightness number from arguments
 function get_bri { 
-  if [[ $1 =~ ^[0-9]+$ ]] ; then
+  if [[ $1 =~ ^[0-9]+%$ ]] ; then
+    echo $((256/100*${1%\%})) 
+  elif [[ $1 =~ ^[0-9]+$ ]] ; then
     echo $1
   else
     case $1 in
@@ -102,8 +105,7 @@ lights="1 2 3"
 
 if [[ $# == 1 ]]
 then
-  if [[ $1 == "on" ]]
-  then
+  if [[ $1 == "on" ]] ; then
     #hue_onoff "on" $lights
     hue_on_hue_sat_brightness $lime $verysoft $bright $lights
   elif [[ $1 == "off" ]] ; then
@@ -112,8 +114,6 @@ then
     hue_alert on 1
     sleep 2
     hue_alert off 1
-  elif [[ $1 == "test" ]] ; then
-    get_hue 'violet'
   else
     usage
   fi
@@ -130,6 +130,8 @@ else
       else
         hue_on_mired_brightness $(get_temp $2) $(get_bri $3) $lights
       fi
+    elif [[ $1 == "test" ]] ; then
+      echo $((256/100*${2%\%}))
     else
       usage
     fi
@@ -143,5 +145,4 @@ else
     exit
   fi
 fi
-
 
