@@ -26,8 +26,14 @@ violet=56100
 
 
 function usage {
-    echo "Usage: $cmdname [on | off]"
-    echo "       $cmdname set [hue] [sat] [bri]" 
+  echo "Usage: $cmdname [on | off]"
+  echo "       $cmdname set [hue] [sat] [bri]"
+  echo "       $cmdname white [temp]"
+  echo "" 
+  echo "       Colors: red, yellow, lime, blue, violet"
+  echo "       Saturation: vsoft, soft, hard"
+  echo "       Brightness: low, medium, high"
+  echo "       Color Temp: cool, medium, warm"
 }
 
 # Calculate hue number from arguments
